@@ -18,6 +18,18 @@ public class App
     	response = send((byte) 0x02, "yolo-batman", "");
     	System.out.println("Expected RESP 0x00, Got "+response[0]);
     	System.out.println("Expected VAL yolo-batman-value, Got "+getValue(response));
+    	
+    	System.out.println("\n\nTesting REMOVE yolo-batman");
+    	response = send((byte) 0x03, "yolo-batman", "");
+    	System.out.println("Expected RESP 0x00, Got "+response[0]);
+    	
+    	System.out.println("\n\nTesting REMOVE non-existant-key");
+    	response = send((byte) 0x03, "non-existant-key", "");
+    	System.out.println("Expected RESP 0x01, Got "+response[0]);
+    	
+    	System.out.println("\n\nTesting FAKECOMMAND yolo-batman");
+    	response = send((byte) 0x04, "yolo-batman", "");
+    	System.out.println("Expected RESP 0x05, Got "+response[0]);
     }
     
 	private static byte[] send(byte command, String key, String value) throws Exception {
