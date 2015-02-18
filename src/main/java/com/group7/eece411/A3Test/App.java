@@ -27,25 +27,31 @@ public class App
 	
     public static void main( String[] args ) throws Exception
     {
+    	int numFailTests = 0;
     	test = new Tests("file/hosts.txt");
 
-    	assertThat(SUCCESS, NO_VALUE, test.put("yolo-batman", "yolo-batman-value"));
-    	assertThat(SUCCESS, "yolo-batman-value", test.get("yolo-batman"));
-    	assertThat(SUCCESS, NO_VALUE, test.remove("yolo-batman"));
+    	numFailTests += assertThat("Normal put", SUCCESS, NO_VALUE, test.put("yolo-batman", "yolo-batman-value"));
+    	numFailTests += assertThat("Normal get", SUCCESS, "yolo-batman-value", test.get("yolo-batman"));
+    	numFailTests += assertThat("Normal remove", SUCCESS, NO_VALUE, test.remove("yolo-batman"));
+    	
+    	System.out.println("\n============================\n"+numFailTests+" failed tests");
     }
     
-    public static void assertThat(int respCode, String value, byte[] respBytes) {
+    public static int assertThat(String testName, int respCode, String value, byte[] respBytes) {
+    	System.out.println("\nTest "+testName+"\n-----------------------------------");
     	if (respBytes == null) {
     		System.out.println("NO RESPONSE");
-    		return;
+    		return 1;
     	}
     	int rc = test.getResponseCode(respBytes);
     	String v = test.getValue(respBytes);
     	
     	if (respCode == rc && v.equals(value)) {
     		System.out.println("OK expected response code: "+respCode+" got: "+rc+", expected value: "+value+" got: "+v);
+    		return 0;
     	} else {
     		System.out.println("FAIL expected response code: "+respCode+" got: "+rc+", expected value: "+value+" got: "+v);
+    		return 1;
     	}
     }
 }

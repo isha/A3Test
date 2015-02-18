@@ -24,21 +24,21 @@ public class Tests {
 	
 	public byte[] put(String k, String v) throws Exception {
 		byte[] response;
-		System.out.println("\nPUT key: "+k+", value: "+v);
+		//System.out.println("PUT key: "+k+", value: "+v);
     	response = send((byte) 0x01, k, v);
     	return response;
 	}
 	
 	public byte[] get(String k) throws Exception {
 		byte[] response;
-		System.out.println("\nGET key: "+k);
+		//System.out.println("GET key: "+k);
     	response = send((byte) 0x02, k, "");
     	return response;
 	}
 	
 	public byte[] remove(String k) throws Exception {
 		byte[] response;
-		System.out.println("\nREMOVE key: "+k);
+		//System.out.println("REMOVE key: "+k);
     	response = send((byte) 0x03, k, "");
     	return response;
 	}
