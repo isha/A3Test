@@ -60,7 +60,7 @@ public class Tests {
 		}
 	}
 	
-	private byte[] send(byte command, String key, String value) throws Exception {
+	public byte[] send(byte command, String key, String value) throws Exception {
 		UDPClient client = new UDPClient(4567);
 		try {
 			// Prep key bytes
