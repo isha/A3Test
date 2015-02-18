@@ -50,7 +50,7 @@ public class Tests {
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			String[] lineArray = line.split(":");
-			if (lineArray.length != 2) {
+			if (lineArray.length < 2) {
 				System.out.println("Invalid Line Found in hosts.txt");
 			} else {
 				NodeInfo n = new NodeInfo(lineArray[0], lineArray[1]);
