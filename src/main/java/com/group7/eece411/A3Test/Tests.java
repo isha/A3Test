@@ -75,7 +75,7 @@ public class Tests {
 		client.send("127.0.0.1", String.valueOf(7777), new String(buffer.array(), Charset.forName("UTF-8")) );
 		
 		// Receive message
-		client.setTimeout(3000);
+		client.setTimeout(2000);
 		byte[] rcvMsg = client.receive();
 		
 		byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
