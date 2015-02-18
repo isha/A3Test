@@ -112,7 +112,7 @@ public class Tests {
 			String value = new String(rcvValue, Charset.forName("UTF-8"));
 			return value;
 		}
-		return null;
+		return "";
 	}
 	
 	public int getResponseCode(byte[] msg) {	
