@@ -51,7 +51,8 @@ public class App
     	int rc = test.getResponseCode(respBytes);
     	String v = test.getValue(respBytes);
     	
-    	if (respCode == rc && v.equals(value)) {
+    	if (respCode == rc && v.equals(value)) { 
+    		//TODO : value and value-length could be null, according to document of assignment 3, value length and value are optional 
     		System.out.println("OK expected response code: "+respCode+" got: "+rc+", expected value: "+value+" got: "+v);
     		return 0;
     	} else {

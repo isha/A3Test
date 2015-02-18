@@ -104,13 +104,15 @@ public class Tests {
 	public String getValue(byte[] msg) {
 		ByteBuffer bf = ByteBuffer.wrap(msg).order(ByteOrder.LITTLE_ENDIAN);
 		byte responseCode = bf.get();
-		short valueSize = bf.getShort();
-		byte[] rcvValue = new byte[valueSize];
-		System.out.println("value size : "+valueSize);
-		bf.get(rcvValue, 0, valueSize);
-		String value = new String(rcvValue, Charset.forName("UTF-8"));
-		
-		return value;
+		if(bf.hasRemaining()) {
+			short valueSize = bf.getShort();
+			byte[] rcvValue = new byte[valueSize];
+			System.out.println("value size : "+valueSize);
+			bf.get(rcvValue, 0, valueSize);
+			String value = new String(rcvValue, Charset.forName("UTF-8"));
+			return value;
+		}
+		return null;
 	}
 	
 	public int getResponseCode(byte[] msg) {	
