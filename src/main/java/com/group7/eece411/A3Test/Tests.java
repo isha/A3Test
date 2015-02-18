@@ -8,6 +8,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Random;
 import java.util.Vector;
 
 public class Tests {
@@ -80,8 +81,12 @@ public class Tests {
 			ByteBuffer buffer = ByteBuffer.allocate(1+32+2+valueBytes.length).order(ByteOrder.LITTLE_ENDIAN);
 			buffer.put(command).put(keyBytes).putShort((short) valueBytes.length).put(valueBytes);
 			
+			// Pick random node to send request to
+			Random rand = new Random(); 
+			NodeInfo n = nodes.get(rand.nextInt(nodes.size()));
+			
 			// Send message
-			client.send("127.0.0.1", String.valueOf(7777), new String(buffer.array(), Charset.forName("UTF-8")) );
+			client.send(n.hostName, n.port, new String(buffer.array(), Charset.forName("UTF-8")) );
 			
 			// Receive message
 			client.setTimeout(2000);
