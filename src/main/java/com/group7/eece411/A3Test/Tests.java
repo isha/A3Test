@@ -106,7 +106,8 @@ public class Tests {
 		byte responseCode = bf.get();
 		short valueSize = bf.getShort();
 		byte[] rcvValue = new byte[valueSize];
-		bf.get(rcvValue, 3, valueSize);
+		System.out.println("value size : "+valueSize);
+		bf.get(rcvValue, 0, valueSize);
 		String value = new String(rcvValue, Charset.forName("UTF-8"));
 		
 		return value;
