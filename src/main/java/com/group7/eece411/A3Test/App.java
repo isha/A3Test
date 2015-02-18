@@ -37,7 +37,7 @@ public class App
     	numFailTests += assertThat("Unrecognized key for remove", NON_EXISTENT_KEY, NO_VALUE, test.remove("yolo-batman"));
     	numFailTests += assertThat("Unrecognized key for get", NON_EXISTENT_KEY, NO_VALUE, test.get("fake-key"));
     	numFailTests += assertThat("Unrecognized command", UNRECOGNIZED_COMMAND, NO_VALUE, test.send((byte) 0x56, "fake-key", ""));
-    	
+    	//numFailTests += assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
     	
     	System.out.println("\n============================\n"+numFailTests+" failed tests");
     }

@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.Vector;
 
@@ -30,6 +32,18 @@ public class Tests {
     	return response;
 	}
 	
+	public byte[] testOutOfSpaceTooManyKeys() throws Exception {
+		byte[] response = null;
+		SecureRandom random = new SecureRandom();
+		String key;
+
+		for(int i = 0; i < 100000; i++) {
+			key = new BigInteger(130, random).toString(32);
+			response = send((byte) 0x01, key, "1");
+		}
+		return response;
+	}
+
 	public byte[] get(String k) throws Exception {
 		byte[] response;
 		//System.out.println("GET key: "+k);
