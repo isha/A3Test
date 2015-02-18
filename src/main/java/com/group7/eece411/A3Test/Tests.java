@@ -61,10 +61,17 @@ public class Tests {
 	private byte[] send(byte command, String key, String value) throws Exception {
 		// Prep key bytes
 		byte[] keyBytes = new byte[32];
-		keyBytes = key.getBytes("UTF-8");
+		byte[] kb = key.getBytes("UTF-8");
+		
+		for (int i=0; i<kb.length && i<32; i++) {
+			keyBytes[i] = kb[i];
+		}
+		
+		//System.out.println("Key bytes: "+keyBytes.length);
 		
 		// Prep value bytes
 		byte[] valueBytes = value.getBytes("UTF-8");
+		//System.out.println("Value bytes: "+valueBytes.length);
 		
 		// Form message with correct sizes for stuff
 		ByteBuffer buffer = ByteBuffer.allocate(1+32+2+valueBytes.length).order(ByteOrder.LITTLE_ENDIAN);
