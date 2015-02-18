@@ -43,8 +43,7 @@ public class Tests {
 	}
 	
 	public Tests(String string) throws IOException {
-		InputStream in = Tests.class.getClass().getResourceAsStream("/"+
-				string);
+		InputStream in = Tests.class.getClassLoader().getResourceAsStream(string);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -76,7 +75,7 @@ public class Tests {
 		client.send("127.0.0.1", String.valueOf(7777), new String(buffer.array(), Charset.forName("UTF-8")) );
 		
 		// Receive message
-		client.setTimeout(2000);
+		client.setTimeout(3000);
 		byte[] rcvMsg = client.receive();
 		
 		byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
