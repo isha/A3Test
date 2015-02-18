@@ -35,6 +35,10 @@ public class App
     }
     
     public static void assertThat(int respCode, String value, byte[] respBytes) {
+    	if (respBytes == null) {
+    		System.out.println("NO RESPONSE");
+    		return;
+    	}
     	int rc = test.getResponseCode(respBytes);
     	String v = test.getValue(respBytes);
     	

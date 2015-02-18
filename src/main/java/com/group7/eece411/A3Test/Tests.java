@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -59,34 +60,38 @@ public class Tests {
 	}
 	
 	private byte[] send(byte command, String key, String value) throws Exception {
-		// Prep key bytes
-		byte[] keyBytes = new byte[32];
-		byte[] kb = key.getBytes("UTF-8");
-		
-		for (int i=0; i<kb.length && i<32; i++) {
-			keyBytes[i] = kb[i];
+		try {
+			// Prep key bytes
+			byte[] keyBytes = new byte[32];
+			byte[] kb = key.getBytes("UTF-8");
+			
+			for (int i=0; i<kb.length && i<32; i++) {
+				keyBytes[i] = kb[i];
+			}
+			
+			//System.out.println("Key bytes: "+keyBytes.length);
+			
+			// Prep value bytes
+			byte[] valueBytes = value.getBytes("UTF-8");
+			//System.out.println("Value bytes: "+valueBytes.length);
+			
+			// Form message with correct sizes for stuff
+			ByteBuffer buffer = ByteBuffer.allocate(1+32+2+valueBytes.length).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.put(command).put(keyBytes).putShort((short) valueBytes.length).put(valueBytes);
+			
+			// Send message
+			UDPClient client = new UDPClient(4567);
+			client.send("127.0.0.1", String.valueOf(7777), new String(buffer.array(), Charset.forName("UTF-8")) );
+			
+			// Receive message
+			client.setTimeout(2000);
+			byte[] rcvMsg = client.receive();
+			
+			byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
+			return actualMsg;
+		} catch(SocketTimeoutException e) {
+			return null;
 		}
-		
-		//System.out.println("Key bytes: "+keyBytes.length);
-		
-		// Prep value bytes
-		byte[] valueBytes = value.getBytes("UTF-8");
-		//System.out.println("Value bytes: "+valueBytes.length);
-		
-		// Form message with correct sizes for stuff
-		ByteBuffer buffer = ByteBuffer.allocate(1+32+2+valueBytes.length).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.put(command).put(keyBytes).putShort((short) valueBytes.length).put(valueBytes);
-		
-		// Send message
-		UDPClient client = new UDPClient(4567);
-		client.send("127.0.0.1", String.valueOf(7777), new String(buffer.array(), Charset.forName("UTF-8")) );
-		
-		// Receive message
-		client.setTimeout(2000);
-		byte[] rcvMsg = client.receive();
-		
-		byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
-		return actualMsg;
 	}
 
 	public String getValue(byte[] msg) {
