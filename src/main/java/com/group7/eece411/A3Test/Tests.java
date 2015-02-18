@@ -60,6 +60,7 @@ public class Tests {
 	}
 	
 	private byte[] send(byte command, String key, String value) throws Exception {
+		UDPClient client = new UDPClient(4567);
 		try {
 			// Prep key bytes
 			byte[] keyBytes = new byte[32];
@@ -80,7 +81,6 @@ public class Tests {
 			buffer.put(command).put(keyBytes).putShort((short) valueBytes.length).put(valueBytes);
 			
 			// Send message
-			UDPClient client = new UDPClient(4567);
 			client.send("127.0.0.1", String.valueOf(7777), new String(buffer.array(), Charset.forName("UTF-8")) );
 			
 			// Receive message
@@ -91,6 +91,8 @@ public class Tests {
 			return actualMsg;
 		} catch(SocketTimeoutException e) {
 			return null;
+		} finally {
+			client.closeSocket();
 		}
 	}
 
