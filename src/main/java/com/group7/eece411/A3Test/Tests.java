@@ -29,6 +29,7 @@ public class Tests {
 		byte[] response;
 		//System.out.println("PUT key: "+k+", value: "+v);
     	response = send((byte) 0x01, k, v);
+    	
     	return response;
 	}
 	
@@ -37,9 +38,13 @@ public class Tests {
 		SecureRandom random = new SecureRandom();
 		String key;
 
-		for(int i = 0; i < 100000; i++) {
+		for(int i = 0; i < 1000; i++) {
 			key = new BigInteger(130, random).toString(32);
-			response = send((byte) 0x01, key, "1");
+			
+			response = put( key, "1");
+			get(key);
+			remove(key);
+			send((byte) 0x34, key, "1");
 		}
 		return response;
 	}
@@ -58,6 +63,17 @@ public class Tests {
     	return response;
 	}
 	
+	long timeWaitingPut = 0;
+	long timeWaitingGet = 0;
+	long timeWaitingDelete = 0;
+	long timeWaiting = 0;
+	long timeWaitingUnrecognized = 0;
+	int numPuts = 0;
+	int numGets = 0;
+	int numDeletes = 0;
+	int numSends = 0;
+	int numUnrecognized = 0;
+	
 	public Tests(String string) throws IOException {
 		InputStream in = Tests.class.getClassLoader().getResourceAsStream(string);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -72,6 +88,7 @@ public class Tests {
 				System.out.println("Identified participating node "+n.hostName+" on port "+n.port);
 			}
 		}
+		
 	}
 	
 	public byte[] send(byte command, String key, String value) throws Exception {
@@ -101,10 +118,48 @@ public class Tests {
 			
 			// Send message
 			client.send(n.hostName, n.port, new String(buffer.array(), Charset.forName("UTF-8")) );
+			long startTime = System.nanoTime();
+			numSends++;
+			if(command == 0x01) {
+				numPuts++;
+			} else if(command == 0x02) {
+				numGets++;
+			} else if(command == 0x03) {
+				numDeletes++;
+			} else {
+				numUnrecognized++;
+			}
 			
 			// Receive message
-			client.setTimeout(2000);
+			client.setTimeout(200);
 			byte[] rcvMsg = client.receive();
+			long endTime = System.nanoTime();
+			long timeElapsed = endTime - startTime;
+			timeWaiting += timeElapsed;
+			if(command == 0x01) {
+				timeWaitingPut += timeElapsed;
+			} else if(command == 0x02) {
+				timeWaitingGet += timeElapsed;
+			} else if(command == 0x03) {
+				timeWaitingDelete += timeElapsed;
+			} else {
+				timeWaitingUnrecognized += timeElapsed;
+			}
+			
+			System.out.println("Time elapsed: " + timeElapsed);
+			System.out.println("Avg Time Waiting: " + timeWaiting / numSends + " out of " + numSends);
+			if(numGets > 0) {
+				System.out.println("Avg Time Waiting Put: " + timeWaitingPut / numPuts+ " out of " + numPuts);
+			}
+			if(numGets > 0) {
+				System.out.println("Avg Time Waiting Get: " + timeWaitingGet / numGets+ " out of " + numGets);
+			}
+			if(numDeletes > 0) {
+				System.out.println("Avg Time Waiting Delete: " + timeWaitingDelete / numDeletes+ " out of " + numDeletes);
+			}
+			if(numUnrecognized > 0) {
+				System.out.println("Avg Time Waiting Unrecognized: " + timeWaitingUnrecognized / numUnrecognized+ " out of " + numUnrecognized);
+			}
 			
 			byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
 			return actualMsg;

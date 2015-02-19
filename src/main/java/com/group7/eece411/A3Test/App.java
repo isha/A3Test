@@ -49,6 +49,7 @@ public class App
     		return 1;
     	}
     	int rc = test.getResponseCode(respBytes);
+    	System.out.println("CODE" + rc);
     	String v = test.getValue(respBytes);
     	
     	if (respCode == rc && v.equals(value)) { 
