@@ -22,30 +22,33 @@ public class App
 	public static final int UNRECOGNIZED_COMMAND = 0x05;
 	
 	public static final String NO_VALUE = "";
+	public static int numFailTests = 0;
+	public static int numTests = 0;
 	
 	public static Tests test;
 	
     public static void main( String[] args ) throws Exception
     {
-    	int numFailTests = 0;
     	test = new Tests("file/hosts.txt");
 
-    	numFailTests += assertThat("Normal put", SUCCESS, NO_VALUE, test.put("yolo-batman", "yolo-batman-value"));
-    	numFailTests += assertThat("Normal get", SUCCESS, "yolo-batman-value", test.get("yolo-batman"));
-    	numFailTests += assertThat("Normal remove", SUCCESS, NO_VALUE, test.remove("yolo-batman"));
+    	assertThat("Normal put", SUCCESS, NO_VALUE, test.put("yolo-batman", "yolo-batman-value"));
+    	assertThat("Normal get", SUCCESS, "yolo-batman-value", test.get("yolo-batman"));
+    	assertThat("Normal remove", SUCCESS, NO_VALUE, test.remove("yolo-batman"));
     	
-    	numFailTests += assertThat("Unrecognized key for remove", NON_EXISTENT_KEY, NO_VALUE, test.remove("yolo-batman"));
-    	numFailTests += assertThat("Unrecognized key for get", NON_EXISTENT_KEY, NO_VALUE, test.get("fake-key"));
-    	numFailTests += assertThat("Unrecognized command", UNRECOGNIZED_COMMAND, NO_VALUE, test.send((byte) 0x56, "fake-key", ""));
-    	//numFailTests += assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
+    	assertThat("Unrecognized key for remove", NON_EXISTENT_KEY, NO_VALUE, test.remove("yolo-batman"));
+    	assertThat("Unrecognized key for get", NON_EXISTENT_KEY, NO_VALUE, test.get("fake-key"));
+    	assertThat("Unrecognized command", UNRECOGNIZED_COMMAND, NO_VALUE, test.send((byte) 0x56, "fake-key", ""));
+    	//assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
     	
-    	System.out.println("\n============================\n"+numFailTests+" failed tests");
+    	System.out.println("\n============================\n"+numFailTests+" failed tests out of "+numTests+" tests performed");
     }
     
     public static int assertThat(String testName, int respCode, String value, byte[] respBytes) {
+    	numTests++;
     	System.out.println("\nTest "+testName+"\n-----------------------------------");
     	if (respBytes == null) {
     		System.out.println("NO RESPONSE");
+    		numFailTests++;
     		return 1;
     	}
     	int rc = test.getResponseCode(respBytes);
@@ -57,6 +60,7 @@ public class App
     		return 0;
     	} else {
     		System.out.println("FAIL expected response code: "+respCode+" got: "+rc+", expected value: "+value+" got: "+v);
+    		numFailTests++;
     		return 1;
     	}
     }
