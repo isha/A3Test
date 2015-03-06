@@ -40,6 +40,8 @@ public class App
     	assertThat("Unrecognized command", UNRECOGNIZED_COMMAND, NO_VALUE, test.send((byte) 0x56, "fake-key", ""));
     	
     	assertThat("Put with incorrect short value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-1", 2, "key-1-value"));
+    	assertThat("Put with incorrect large value length", OUT_OF_SPACE, NO_VALUE, test.put("key-2", 65536, "key-1-value"));
+    	
     	//assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
     	
     	System.out.println("\n============================\n"+numFailTests+" failed tests out of "+numTests+" tests performed");

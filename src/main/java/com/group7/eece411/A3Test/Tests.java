@@ -27,14 +27,12 @@ public class Tests {
 	
 	public byte[] put(String k, String v) throws Exception {
 		byte[] response;
-		//System.out.println("PUT key: "+k+", value: "+v);
     	response = send((byte) 0x01, k, v);
     	return response;
 	}
 	
 	public byte[] put(String k, int v_size, String v) throws Exception {
 		byte[] response;
-		//System.out.println("PUT key: "+k+", value: "+v);
     	response = send((byte) 0x01, k, v, v_size);
     	return response;
 	}
@@ -53,14 +51,12 @@ public class Tests {
 
 	public byte[] get(String k) throws Exception {
 		byte[] response;
-		//System.out.println("GET key: "+k);
     	response = send((byte) 0x02, k, "");
     	return response;
 	}
 	
 	public byte[] remove(String k) throws Exception {
 		byte[] response;
-		//System.out.println("REMOVE key: "+k);
     	response = send((byte) 0x03, k, "");
     	return response;
 	}
@@ -96,12 +92,10 @@ public class Tests {
 				keyBytes[i] = kb[i];
 			}
 			
-			//System.out.println("Key bytes: "+keyBytes.length);
-			
 			// Prep value bytes
 			byte[] valueBytes = value.getBytes("UTF-8");
-			//System.out.println("Value bytes: "+valueBytes.length);
 			
+			// Value size to be included in the message can be specified. If -1 then use the size of the value array
 			if (vSize == -1) {
 				vSize = valueBytes.length;
 			}
