@@ -32,6 +32,13 @@ public class Tests {
     	return response;
 	}
 	
+	public byte[] put(String k, int v_size, String v) throws Exception {
+		byte[] response;
+		//System.out.println("PUT key: "+k+", value: "+v);
+    	response = send((byte) 0x01, k, v, v_size);
+    	return response;
+	}
+	
 	public byte[] testOutOfSpaceTooManyKeys() throws Exception {
 		byte[] response = null;
 		SecureRandom random = new SecureRandom();
@@ -75,6 +82,10 @@ public class Tests {
 	}
 	
 	public byte[] send(byte command, String key, String value) throws Exception {
+		return send(command, key, value, -1);
+	}
+	
+	public byte[] send(byte command, String key, String value, int vSize) throws Exception {
 		UDPClient client = new UDPClient(4567);
 		try {
 			// Prep key bytes
@@ -91,9 +102,13 @@ public class Tests {
 			byte[] valueBytes = value.getBytes("UTF-8");
 			//System.out.println("Value bytes: "+valueBytes.length);
 			
+			if (vSize == -1) {
+				vSize = valueBytes.length;
+			}
+			
 			// Form message with correct sizes for stuff
 			ByteBuffer buffer = ByteBuffer.allocate(1+32+2+valueBytes.length).order(ByteOrder.LITTLE_ENDIAN);
-			buffer.put(command).put(keyBytes).putShort((short) valueBytes.length).put(valueBytes);
+			buffer.put(command).put(keyBytes).putShort((short) vSize).put(valueBytes);
 			
 			// Pick random node to send request to
 			Random rand = new Random(); 
