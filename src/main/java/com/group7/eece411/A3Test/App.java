@@ -43,13 +43,21 @@ public class App
     	
     	// Incorrect value lengths
     	assertThat("Put with incorrect short value length", SUCCESS, NO_VALUE, test.put("key-1", 2, "key-1-value"));
-    	assertThat("Put with incorrect large value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-2", 65535, "key-1-value"));
+    	//assertThat("Put with incorrect large value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-2", 6500, "key-1-value"));
     	assertThat("Get works with previous incorrect value length", SUCCESS, "ke", test.get("key-1"));
     	
     	// Weird inputs
     	assertThat("Put on weird key", SUCCESS, NO_VALUE, test.put("&*%*&%*^(&*%&%$$#$%*&(&*^&", ")(&*^%*&^%#^&*^\n\n(*&^%$$$^&*()&*^%"));
     	assertThat("Get on weird key", SUCCESS, ")(&*^%*&^%#^&*^\n\n(*&^%$$$^&*()&*^%", test.get("&*%*&%*^(&*%&%$$#$%*&(&*^&"));
     	assertThat("Remove on weird key", SUCCESS, NO_VALUE, test.remove("&*%*&%*^(&*%&%$$#$%*&(&*^&"));
+    	
+    	// Caching of replies
+    	assertThat("Cache setup put", SUCCESS, NO_VALUE, test.put("stuffkey", "stuffvalue"));
+    	Object[] cacheObj = test.get("stuffkey");
+    	assertThat("Cache get first try", SUCCESS, "stuffvalue", cacheObj);
+    	assertThat("Cache remove", SUCCESS, NO_VALUE, test.remove("stuffkey"));
+    	assertThat("Cache get (should be served by cache)", SUCCESS, "stuffvalue", test.get("stuffkey", (Header) cacheObj[1]));
+    	
     	
     	//assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
     	
@@ -76,5 +84,9 @@ public class App
     		numFailTests++;
     		return 1;
     	}
+    }
+    public static int assertThat(String testName, int respCode, String value, Object[] obj) {
+    	byte[] respBytes = (byte[]) obj[0];
+    	return assertThat(testName, respCode, value, respBytes);
     }
 }

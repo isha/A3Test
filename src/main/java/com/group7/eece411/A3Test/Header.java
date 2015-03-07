@@ -9,6 +9,7 @@ public class Header {
 	private InetAddress source;
 	private int port;
 	private long timestamp;
+	private byte[] uniqueID;
 	
 	public Header(InetAddress s, int p) {
 		source = s;
@@ -28,7 +29,12 @@ public class Header {
 					.putShort((short)this.port)
 					.put(new byte[2])
 					.putLong(timestamp);
-		return resultBuffer.array();
+		uniqueID = resultBuffer.array();
+		return uniqueID;
+	}
+	
+	public byte[] getUniqueID() {
+		return uniqueID;
 	}
 	
 	public void decode(byte[] message) throws UnknownHostException {

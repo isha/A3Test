@@ -25,42 +25,38 @@ public class Tests {
 	
 	Vector<NodeInfo> nodes = new Vector<NodeInfo>();
 	
-	public byte[] put(String k, String v) throws Exception {
-		byte[] response;
-    	response = send((byte) 0x01, k, v);
-    	return response;
-	}
-	
-	public byte[] put(String k, int v_size, String v) throws Exception {
-		byte[] response;
-    	response = send((byte) 0x01, k, v, v_size);
-    	return response;
-	}
-	
-	public byte[] testOutOfSpaceTooManyKeys() throws Exception {
-		byte[] response = null;
-		SecureRandom random = new SecureRandom();
-		String key;
+	  public Object[] put(String k, String v) throws Exception {
+		      return send((byte) 0x01, k, v);
+		  }
+		  
+		  public Object[] put(String k, int v_size, String v) throws Exception {
+		      return send((byte) 0x01, k, v, v_size);
+		  }
+		  
+		  public Object[] testOutOfSpaceTooManyKeys() throws Exception {
+		    SecureRandom random = new SecureRandom();
+		    String key;
+		    Object obj[] = null;
+		    
+		    for(int i = 0; i < 100000; i++) {
+		      key = new BigInteger(130, random).toString(32);
+		      obj = send((byte) 0x01, key, "1");
+		    }
+		    return obj;
+		  }
 
-		for(int i = 0; i < 100000; i++) {
-			key = new BigInteger(130, random).toString(32);
-			response = send((byte) 0x01, key, "1");
+		  public Object[] get(String k) throws Exception {
+		      return send((byte) 0x02, k, "");
+		  }
+		  
+
+		public Object[] get(String k, Header header) throws Exception {
+			return sendWithHeader((byte) 0x02, k, "", header);
 		}
-		return response;
-	}
-
-	public byte[] get(String k) throws Exception {
-		byte[] response;
-    	response = send((byte) 0x02, k, "");
-    	return response;
-	}
-	
-	public byte[] remove(String k) throws Exception {
-		byte[] response;
-    	response = send((byte) 0x03, k, "");
-    	return response;
-	}
-	
+		  
+		  public Object[] remove(String k) throws Exception {
+		      return send((byte) 0x03, k, "");
+		  }
 	public Tests(String string) throws IOException {
 		InputStream in = Tests.class.getClassLoader().getResourceAsStream(string);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -77,12 +73,13 @@ public class Tests {
 		}
 	}
 	
-	public byte[] send(byte command, String key, String value) throws Exception {
+	public Object[] send(byte command, String key, String value) throws Exception {
 		return send(command, key, value, -1);
 	}
 	
-	public byte[] send(byte command, String key, String value, int vSize) throws Exception {
+	public Object[] send(byte command, String key, String value, int vSize) throws Exception {
 		UDPClient client = new UDPClient(4567);
+		Header h;
 		try {
 			// Prep key bytes
 			byte[] keyBytes = new byte[32];
@@ -109,14 +106,58 @@ public class Tests {
 			NodeInfo n = nodes.get(rand.nextInt(nodes.size()));
 			
 			// Send message
-			client.send(n.hostName, n.port, new String(buffer.array(), Charset.forName("UTF-8")) );
+			h = client.send(n.hostName, n.port, new String(buffer.array(), Charset.forName("UTF-8")) );
 			
 			// Receive message
 			client.setTimeout(2000);
 			byte[] rcvMsg = client.receive();
 			
 			byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
-			return actualMsg;
+			return new Object[]{actualMsg, h};
+		} catch(SocketTimeoutException e) {
+			return null;
+		} finally {
+			client.closeSocket();
+		}
+	}
+	
+	public Object[] sendWithHeader(byte command, String key, String value, Header header) throws Exception {
+		UDPClient client = new UDPClient(4567);
+		int vSize = -1;
+		try {
+			// Prep key bytes
+			byte[] keyBytes = new byte[32];
+			byte[] kb = key.getBytes("UTF-8");
+			
+			for (int i=0; i<kb.length && i<32; i++) {
+				keyBytes[i] = kb[i];
+			}
+			
+			// Prep value bytes
+			byte[] valueBytes = value.getBytes("UTF-8");
+			
+			// Value size to be included in the message can be specified. If -1 then use the size of the value array
+			if (vSize == -1) {
+				vSize = valueBytes.length;
+			}
+			
+			// Form message with correct sizes for stuff
+			ByteBuffer buffer = ByteBuffer.allocate(1+32+2+valueBytes.length).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.put(command).put(keyBytes).putShort((short) vSize).put(valueBytes);
+			
+			// Pick random node to send request to
+			Random rand = new Random(); 
+			NodeInfo n = nodes.get(rand.nextInt(nodes.size()));
+			
+			// Send message
+			client.send(n.hostName, n.port, new String(buffer.array(), Charset.forName("UTF-8")), header.getUniqueID());
+			
+			// Receive message
+			client.setTimeout(2000);
+			byte[] rcvMsg = client.receive();
+			
+			byte[] actualMsg = new Header().decodeAndGetMessage(rcvMsg);
+			return new Object[]{actualMsg, header};
 		} catch(SocketTimeoutException e) {
 			return null;
 		} finally {
@@ -141,5 +182,6 @@ public class Tests {
 	public int getResponseCode(byte[] msg) {	
 		return msg[0];
 	}
+
 
 }
