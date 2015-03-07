@@ -31,18 +31,25 @@ public class App
     {
     	test = new Tests("file/hosts.txt");
 
+    	// Normal operation
     	assertThat("Normal put", SUCCESS, NO_VALUE, test.put("yolo-batman", "yolo-batman-value"));
     	assertThat("Normal get", SUCCESS, "yolo-batman-value", test.get("yolo-batman"));
     	assertThat("Normal remove", SUCCESS, NO_VALUE, test.remove("yolo-batman"));
     	
+    	// Unrecognized keys
     	assertThat("Unrecognized key for remove", NON_EXISTENT_KEY, NO_VALUE, test.remove("yolo-batman"));
     	assertThat("Unrecognized key for get", NON_EXISTENT_KEY, NO_VALUE, test.get("fake-key"));
     	assertThat("Unrecognized command", UNRECOGNIZED_COMMAND, NO_VALUE, test.send((byte) 0x56, "fake-key", ""));
     	
+    	// Incorrect value lengths
     	assertThat("Put with incorrect short value length", SUCCESS, NO_VALUE, test.put("key-1", 2, "key-1-value"));
-    	assertThat("Put with incorrect large value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-2", 65536, "key-1-value"));
-    	
+    	assertThat("Put with incorrect large value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-2", 65535, "key-1-value"));
     	assertThat("Get works with previous incorrect value length", SUCCESS, "ke", test.get("key-1"));
+    	
+    	// Weird inputs
+    	assertThat("Put on weird key", SUCCESS, NO_VALUE, test.put("&*%*&%*^(&*%&%$$#$%*&(&*^&", ")(&*^%*&^%#^&*^\n\n(*&^%$$$^&*()&*^%"));
+    	assertThat("Get on weird key", SUCCESS, ")(&*^%*&^%#^&*^\n\n(*&^%$$$^&*()&*^%", test.get("&*%*&%*^(&*%&%$$#$%*&(&*^&"));
+    	assertThat("Remove on weird key", SUCCESS, NO_VALUE, test.remove("&*%*&%*^(&*%&%$$#$%*&(&*^&"));
     	
     	//assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
     	
@@ -51,7 +58,7 @@ public class App
     
     public static int assertThat(String testName, int respCode, String value, byte[] respBytes) {
     	numTests++;
-    	System.out.println("\nTest "+testName+"\n-----------------------------------");
+    	System.out.println("\n-----------------------------------"+"\nTest "+testName);
     	if (respBytes == null) {
     		System.out.println("NO RESPONSE");
     		numFailTests++;
