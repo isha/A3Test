@@ -39,8 +39,10 @@ public class App
     	assertThat("Unrecognized key for get", NON_EXISTENT_KEY, NO_VALUE, test.get("fake-key"));
     	assertThat("Unrecognized command", UNRECOGNIZED_COMMAND, NO_VALUE, test.send((byte) 0x56, "fake-key", ""));
     	
-    	assertThat("Put with incorrect short value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-1", 2, "key-1-value"));
-    	assertThat("Put with incorrect large value length", OUT_OF_SPACE, NO_VALUE, test.put("key-2", 65536, "key-1-value"));
+    	assertThat("Put with incorrect short value length", SUCCESS, NO_VALUE, test.put("key-1", 2, "key-1-value"));
+    	assertThat("Put with incorrect large value length", INTERNAL_FAILURE, NO_VALUE, test.put("key-2", 65536, "key-1-value"));
+    	
+    	assertThat("Get works with previous incorrect value length", SUCCESS, "ke", test.get("key-1"));
     	
     	//assertThat("Out of space", OUT_OF_SPACE, NO_VALUE, test.testOutOfSpaceTooManyKeys());
     	
